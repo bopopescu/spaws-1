@@ -9,15 +9,8 @@ from boto import ec2
 from spaws.spark_ec2 import stringify_command, ssh_command, get_existing_cluster, wait_for_cluster_state
 
 
-@click.command()
-@click.option("--region", "-r", default="us-east-1", help='EC2 region.')
-@click.option("--user", "-u", default="root", help='SSH user.')
-@click.option("--identity-file", "-i", default=None, help="SSH identity file.")
-@click.option("--directory", "-d", default=None, help='SSH host.')
-@click.option("--start-and-stop", "-s", default=False, is_flag=True, help="Start cluster first and stop it afterwards.")
-@click.argument("cluster_name", nargs=1)
-@click.argument("command", nargs=-1)
-def main(region, user, identity_file, directory, start_and_stop, cluster_name, command):
+def spaws(cluster_name, command,
+          region="us-east-1", user="root", identity_file=None, directory=None, start_and_stop=False):
     try:
         conn = ec2.connect_to_region(region)
     except Exception as e:
@@ -81,3 +74,15 @@ def main(region, user, identity_file, directory, start_and_stop, cluster_name, c
                     inst.terminate()
                 else:
                     inst.stop()
+
+
+@click.command()
+@click.option("--region", "-r", default="us-east-1", help='EC2 region.')
+@click.option("--user", "-u", default="root", help='SSH user.')
+@click.option("--identity-file", "-i", default=None, help="SSH identity file.")
+@click.option("--directory", "-d", default=None, help='SSH host.')
+@click.option("--start-and-stop", "-s", default=False, is_flag=True, help="Start cluster first and stop it afterwards.")
+@click.argument("cluster_name", nargs=1)
+@click.argument("command", nargs=-1)
+def main(region, user, identity_file, directory, start_and_stop, cluster_name, command):
+    spaws(cluster_name, command, region, user, identity_file, directory, start_and_stop)
