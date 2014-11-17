@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 name = "spaws"
 version = "0.1"
-requires = ["setuptools", "boto"]
+requires = ["setuptools", "boto", "click"]
 
 
 ###########################################
