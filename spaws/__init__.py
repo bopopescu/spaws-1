@@ -50,7 +50,7 @@ class Spaws(object):
                     inst.stop()
 
     def run(self, command, directory=None):
-        active_master = self.master_nodes[0]
+        active_master = self.master_nodes[0].public_dns_name
         source_dir = directory or os.getcwd()
         destination_dir = os.path.join("~", "spawsings", socket.gethostname()) + source_dir
 
