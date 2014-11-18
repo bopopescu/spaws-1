@@ -50,33 +50,17 @@ class Spaws(object):
                     inst.stop()
 
     def run(self, command, directory=None):
-        active_master = self.master_nodes[0].public_dns_name
-        source_dir = directory or os.getcwd()
-        destination_dir = os.path.join("~", "spawsings", socket.gethostname()) + source_dir
-
-        print "Source dir:", source_dir
-        print "Destination dir:", destination_dir
-
-        subprocess.check_call(ssh_command(self.opts) + [
-            "{0}@{1}".format(self.opts.user, active_master),
-            "mkdir", "-p", destination_dir
-        ])
-
-        subprocess.check_call([
-            'rsync', '-rv',
-            '-e', stringify_command(ssh_command(self.opts)),
-            "{0}/".format(source_dir),
-            "{0}@{1}:{2}".format(self.opts.user, active_master, destination_dir)
-        ])
-
-        subprocess.check_call(command)
+        master_host = self.master_nodes[0].public_dns_name
+        if directory:
+            command = ["cd {0};".format(directory)] + command
+        subprocess.check_call(ssh_command(self.opts) + ["-A", "{0}@{1}".format(self.opts.user, master_host)] + command)
 
 
 @click.command()
 @click.option("--region", "-r", default="us-east-1", help='EC2 region.')
 @click.option("--user", "-u", default="root", help='SSH user.')
 @click.option("--identity-file", "-i", default=None, help="SSH identity file.")
-@click.option("--directory", "-d", default=None, help='SSH host.')
+@click.option("--directory", "-d", default=None, help="Remote directory to go to first.")
 @click.option("--start-and-stop", "-s", default=False, is_flag=True, help="Start cluster first and stop it afterwards.")
 @click.argument("cluster_name", nargs=1)
 @click.argument("command", nargs=-1)
@@ -90,7 +74,7 @@ def main(region, user, identity_file, directory, start_and_stop, cluster_name, c
         if start_and_stop:
             spaws.start()
         try:
-            spaws.run(command, directory=directory)
+            spaws.run(command, directory)
         finally:
             if start_and_stop:
                 spaws.stop()
