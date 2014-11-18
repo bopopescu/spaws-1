@@ -74,7 +74,7 @@ def main(region, user, identity_file, directory, start_and_stop, cluster_name, c
         if start_and_stop:
             spaws.start()
         try:
-            spaws.run(command, directory)
+            spaws.run(list(command), directory)
         finally:
             if start_and_stop:
                 spaws.stop()
