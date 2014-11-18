@@ -575,7 +575,7 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
             print slave.public_dns_name
             ssh_write(slave.public_dns_name, opts, ['tar', 'x'], dot_ssh_tar)
 
-    modules = ['spark', 'shark', 'ephemeral-hdfs', 'mapreduce', 'spark-standalone', 'tachyon']
+    modules = ['cleanup', 'spark', 'shark', 'ephemeral-hdfs', 'mapreduce', 'spark-standalone', 'tachyon']
 
     if opts.ebs_vol_size > 0:
         modules.append('persistent-hdfs')
