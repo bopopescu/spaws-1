@@ -45,7 +45,7 @@ SPARK_EC2_DIR = os.path.dirname(os.path.realpath(__file__))
 # cfr. https://issues.apache.org/jira/browse/SPARK-3821
 MESOS_SPARK_EC2_BRANCH = "packer"
 # A URL prefix from which to fetch AMI information
-AMI_PREFIX = "https://raw.github.com/nchammas/spark-ec2/{b}/ami-list/base".format(b=MESOS_SPARK_EC2_BRANCH)
+AMI_PREFIX = "https://raw.github.com/klbostee/spark-ec2/{b}/ami-list/base".format(b=MESOS_SPARK_EC2_BRANCH)
 
 
 class UsageError(Exception):
@@ -591,7 +591,7 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
         opts=opts,
         command="rm -rf spark-ec2"
         + " && "
-        + "git clone https://github.com/nchammas/spark-ec2.git -b {b}".format(b=MESOS_SPARK_EC2_BRANCH)
+        + "git clone https://github.com/klbostee/spark-ec2.git -b {b}".format(b=MESOS_SPARK_EC2_BRANCH)
     )
 
     print "Deploying files to master..."
