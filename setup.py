@@ -17,7 +17,7 @@ kwargs = {
     "install_requires": requires,
     "test_suite": "nose.collector",
     "tests_require": ["nose"],
-    "zip_safe": True
+    "include_package_data": True
 }
 kwargs["entry_points"] = {
     # buildout.cfg should be used instead to define entry points,
