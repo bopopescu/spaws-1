@@ -45,7 +45,7 @@ SPARK_EC2_DIR = os.path.dirname(os.path.realpath(__file__))
 # cfr. https://issues.apache.org/jira/browse/SPARK-3821
 MESOS_SPARK_EC2_BRANCH = "packer"
 # A URL prefix from which to fetch AMI information
-AMI_PREFIX = "https://raw.github.com/klbostee/spark-ec2/{b}/ami-list/base".format(b=MESOS_SPARK_EC2_BRANCH)
+AMI_PREFIX = "https://raw.github.com/klbostee/spark-ec2/{b}/ami-list/1.1.0".format(b=MESOS_SPARK_EC2_BRANCH)
 
 
 class UsageError(Exception):
