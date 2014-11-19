@@ -43,7 +43,7 @@ DEFAULT_SPARK_VERSION = "1.1.0"
 SPARK_EC2_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # cfr. https://issues.apache.org/jira/browse/SPARK-3821
-MESOS_SPARK_EC2_BRANCH = "packer"
+MESOS_SPARK_EC2_BRANCH = "v4"
 # A URL prefix from which to fetch AMI information
 AMI_PREFIX = "https://raw.github.com/klbostee/spark-ec2/{b}/ami-list/base".format(b=MESOS_SPARK_EC2_BRANCH)
 
@@ -92,6 +92,9 @@ def parse_args():
     parser.add_option(
         "-v", "--spark-version", default=DEFAULT_SPARK_VERSION,
         help="Version of Spark to use: 'X.Y.Z' or a specific git hash (default: %default)")
+    parser.add_option(
+        "-p", "--python", default="python2.7",
+        help="Python executable to use for PySpark (default: %default)")
     parser.add_option(
         "--spark-git-repo",
         default="https://github.com/apache/spark",
@@ -575,7 +578,7 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
             print slave.public_dns_name
             ssh_write(slave.public_dns_name, opts, ['tar', 'x'], dot_ssh_tar)
 
-    modules = ['cleanup', 'spark', 'shark', 'ephemeral-hdfs', 'mapreduce', 'spark-standalone']
+    modules = ['cleanup', 'python27', 'spark', 'shark', 'ephemeral-hdfs', 'mapreduce', 'spark-standalone']
 
     if opts.ebs_vol_size > 0:
         modules.append('persistent-hdfs')
@@ -781,7 +784,8 @@ def deploy_files(conn, root_dir, opts, master_nodes, slave_nodes, modules):
         "shark_version": shark_v,
         "hadoop_major_version": opts.hadoop_major_version,
         "spark_worker_instances": "%d" % opts.worker_instances,
-        "spark_master_opts": opts.master_opts
+        "spark_master_opts": opts.master_opts,
+        "pyspark_python": opts.python
     }
 
     if opts.copy_aws_credentials:
