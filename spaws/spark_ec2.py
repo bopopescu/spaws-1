@@ -45,7 +45,7 @@ SPARK_EC2_DIR = os.path.dirname(os.path.realpath(__file__))
 # cfr. https://issues.apache.org/jira/browse/SPARK-3821
 MESOS_SPARK_EC2_BRANCH = "v4"
 # A URL prefix from which to fetch AMI information
-AMI_PREFIX = "https://raw.github.com/klbostee/spark-ec2/{b}/ami-list/base".format(b=MESOS_SPARK_EC2_BRANCH)
+AMI_PREFIX = "https://raw.github.com/klbostee/spark-ec2/{b}/ami-list".format(b=MESOS_SPARK_EC2_BRANCH)
 
 
 class UsageError(Exception):
@@ -280,7 +280,7 @@ def get_spark_ami(opts):
         print >> stderr,\
             "Don't recognize %s, assuming type is pvm" % opts.instance_type
 
-    ami_path = "%s/%s/%s" % (AMI_PREFIX, opts.region, "pv" if instance_type == "pvm" else instance_type)
+    ami_path = "%s/%s/%s" % (AMI_PREFIX, opts.region, instance_type)
     try:
         ami = urllib2.urlopen(ami_path).read().strip()
         print "Spark AMI: " + ami
