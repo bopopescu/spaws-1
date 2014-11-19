@@ -6,18 +6,25 @@ import subprocess
 import sys
 
 from boto import ec2
-from spaws.spark_ec2 import stringify_command, ssh_command, get_existing_cluster, wait_for_cluster_state
+from spaws.spark_ec2 import stringify_command, ssh_command, get_existing_cluster, wait_for_cluster_state, setup_cluster
 
 
 class Spaws(object):
 
-    def __init__(self, cluster_name, region="us-east-1", user="root", identity_file=None):
-        conn = ec2.connect_to_region(region)
-        self.opts = collections.namedtuple("Opts", ["user", "identity_file"])(
+    def __init__(self, cluster_name, region="us-east-1", user="root", identity_file=None,
+                 ebs_vol_size=0, hadoop_major_version="2", ganglia=True):
+        self.conn = ec2.connect_to_region(region)
+        self.opts = collections.namedtuple("Opts", [
+            "user", "identity_file", "ebs_vol_size", "hadoop_major_version", "ganglia"
+        ])(
             user=user,
-            identity_file=identity_file
+            identity_file=identity_file,
+            ebs_vol_size=ebs_vol_size,
+            hadoop_major_version=hadoop_major_version,
+            ganglia=ganglia
         )
-        self.master_nodes, self.slave_nodes = get_existing_cluster(conn, self.opts, cluster_name, die_on_error=False)
+        self.master_nodes, self.slave_nodes = get_existing_cluster(self.conn, self.opts, cluster_name,
+                                                                   die_on_error=False)
 
     def start(self):
         # cfr. spark_ec2.py
@@ -34,6 +41,7 @@ class Spaws(object):
             cluster_state='ssh-ready',
             opts=self.opts
         )
+        setup_cluster(self.conn, self.master_nodes, self.slave_nodes, self.opts, False)
 
     def stop(self):
         # cfr. spark_ec2.py
