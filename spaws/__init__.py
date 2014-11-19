@@ -49,7 +49,17 @@ class Spaws(object):
                 else:
                     inst.stop()
 
-    def run(self, command, directory=None):
+    def copy(self, filename, directory="/mnt"):
+        master_host = self.master_nodes[0].public_dns_name
+        command = [
+            "rsync", "-rv",
+            "-e", stringify_command(ssh_command(self.opts)),
+            filename,
+            "{0}@{1}:{2}/".format(self.opts.user, master_host, directory)
+        ]
+        subprocess.check_call(command)
+
+    def run(self, command, directory="/mnt"):
         master_host = self.master_nodes[0].public_dns_name
         if directory:
             command = ["cd {0};".format(directory)] + command
