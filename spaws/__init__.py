@@ -10,18 +10,19 @@ from spaws.spark_ec2 import stringify_command, ssh_command, get_existing_cluster
 class Spaws(object):
 
     def __init__(self, cluster_name, region="us-east-1", user="root", identity_file=None, copy_aws_credentials=True):
-        self.conn = ec2.connect_to_region(region)
-
         orig_argv = sys.argv
-        sys.argv = sys.argv + ["--region", region, "--user", user]
-        if identity_file:
-            sys.argv += ["--identity-file", identity_file]
-        if copy_aws_credentials:
-            sys.argv.append("--copy-aws-credentials")
-        sys.argv += ["start", cluster_name]
-        self.opts = parse_args()[0]
-        sys.argv = orig_argv
+        try:
+            sys.argv = ["spark-ec2", "--region", region, "--user", user]
+            if identity_file:
+                sys.argv += ["--identity-file", identity_file]
+            if copy_aws_credentials:
+                sys.argv.append("--copy-aws-credentials")
+            sys.argv += ["start", cluster_name]
+            self.opts = parse_args()[0]
+        finally:
+            sys.argv = orig_argv
 
+        self.conn = ec2.connect_to_region(region)
         self.master_nodes, self.slave_nodes = get_existing_cluster(self.conn, self.opts, cluster_name,
                                                                    die_on_error=False)
 
