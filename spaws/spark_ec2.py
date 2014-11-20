@@ -78,7 +78,7 @@ def parse_args():
         help="Type of instance to launch (default: %default). " +
              "WARNING: must be 64-bit; small instances won't work")
     parser.add_option(
-        "-m", "--master-instance-type", default="",
+        "-m", "--master-instance-type", default="m1.medium",
         help="Master instance type (leave empty for same as instance-type)")
     parser.add_option(
         "-r", "--region", default="us-east-1",
