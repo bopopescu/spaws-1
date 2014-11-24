@@ -52,6 +52,10 @@ class UsageError(Exception):
     pass
 
 
+class TimeoutError(Exception):
+    pass
+
+
 # Configure and parse our command-line arguments
 def parse_args():
     parser = OptionParser(
@@ -652,7 +656,7 @@ def is_cluster_ssh_available(cluster_instances, opts):
         return True
 
 
-def wait_for_cluster_state(cluster_instances, cluster_state, opts):
+def wait_for_cluster_state(cluster_instances, cluster_state, opts, max_attempts=20):
     """
     cluster_instances: a list of boto.ec2.instance.Instance
     cluster_state: a string representing the desired state of all the instances in the cluster
@@ -667,7 +671,7 @@ def wait_for_cluster_state(cluster_instances, cluster_state, opts):
 
     num_attempts = 0
 
-    while True:
+    while num_attempts <= max_attempts:
         time.sleep(3 * num_attempts)
 
         for i in cluster_instances:
@@ -685,6 +689,8 @@ def wait_for_cluster_state(cluster_instances, cluster_state, opts):
 
         sys.stdout.write(".")
         sys.stdout.flush()
+    else:
+        raise TimeoutError("Not able to SSH to instances even after {0} attempts.".format(num_attempts))
 
     sys.stdout.write("\n")
 
