@@ -27,31 +27,31 @@ class Spaws(object):
 
     def start(self):
         conn = ec2.connect_to_region(self.region)
-        master_nodes, slave_nodes = get_existing_cluster(conn, self.opts, self.cluster_name, die_on_error=False)
-        print "Starting slaves..."
-        for inst in slave_nodes:
+        main_nodes, subordinate_nodes = get_existing_cluster(conn, self.opts, self.cluster_name, die_on_error=False)
+        print "Starting subordinates..."
+        for inst in subordinate_nodes:
             if inst.state not in ["shutting-down", "terminated"]:
                 inst.start()
-        print "Starting master..."
-        for inst in master_nodes:
+        print "Starting main..."
+        for inst in main_nodes:
             if inst.state not in ["shutting-down", "terminated"]:
                 inst.start()
         wait_for_cluster_state(
-            cluster_instances=(master_nodes + slave_nodes),
+            cluster_instances=(main_nodes + subordinate_nodes),
             cluster_state='ssh-ready',
             opts=self.opts
         )
-        setup_cluster(conn, master_nodes, slave_nodes, self.opts, False)
+        setup_cluster(conn, main_nodes, subordinate_nodes, self.opts, False)
 
     def stop(self):
         conn = ec2.connect_to_region(self.region)
-        master_nodes, slave_nodes = get_existing_cluster(conn, self.opts, self.cluster_name, die_on_error=False)
-        print "Stopping master..."
-        for inst in master_nodes:
+        main_nodes, subordinate_nodes = get_existing_cluster(conn, self.opts, self.cluster_name, die_on_error=False)
+        print "Stopping main..."
+        for inst in main_nodes:
             if inst.state not in ["shutting-down", "terminated"]:
                 inst.stop()
-        print "Stopping slaves..."
-        for inst in slave_nodes:
+        print "Stopping subordinates..."
+        for inst in subordinate_nodes:
             if inst.state not in ["shutting-down", "terminated"]:
                 if inst.spot_instance_request_id:
                     inst.terminate()
@@ -60,23 +60,23 @@ class Spaws(object):
 
     def copy(self, filename, directory="/mnt"):
         conn = ec2.connect_to_region(self.region)
-        master_nodes, slave_nodes = get_existing_cluster(conn, self.opts, self.cluster_name, die_on_error=False)
-        master_host = master_nodes[0].public_dns_name
+        main_nodes, subordinate_nodes = get_existing_cluster(conn, self.opts, self.cluster_name, die_on_error=False)
+        main_host = main_nodes[0].public_dns_name
         command = [
             "rsync", "-rv",
             "-e", stringify_command(ssh_command(self.opts)),
             filename,
-            "{0}@{1}:{2}/".format(self.opts.user, master_host, directory)
+            "{0}@{1}:{2}/".format(self.opts.user, main_host, directory)
         ]
         subprocess.check_call(command)
 
     def run(self, command, directory="/mnt"):
         conn = ec2.connect_to_region(self.region)
-        master_nodes, slave_nodes = get_existing_cluster(conn, self.opts, self.cluster_name, die_on_error=False)
-        master_host = master_nodes[0].public_dns_name
+        main_nodes, subordinate_nodes = get_existing_cluster(conn, self.opts, self.cluster_name, die_on_error=False)
+        main_host = main_nodes[0].public_dns_name
         if directory:
             command = ["cd {0};".format(directory)] + command
-        subprocess.check_call(ssh_command(self.opts) + ["-A", "{0}@{1}".format(self.opts.user, master_host)] + command)
+        subprocess.check_call(ssh_command(self.opts) + ["-A", "{0}@{1}".format(self.opts.user, main_host)] + command)
 
 
 @click.command()
